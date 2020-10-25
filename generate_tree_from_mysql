@@ -1,0 +1,96 @@
+<?php
+
+
+$servername = ""; 
+$username = "";
+$password = "";
+$database = "";
+
+ 
+//creating a new connection object using mysqli 
+$con = new mysqli($servername, $username, $password, $database);
+
+$con->set_charset("utf8mb4");
+ 
+//if there is some error connecting to the database
+//with die we will stop the further execution by displaying a message causing the error 
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+
+/*$arr = array(
+  array('id'=>100, 'parentid'=>0, 'name'=>'a'),
+  array('id'=>101, 'parentid'=>100, 'name'=>'a'),
+  array('id'=>102, 'parentid'=>101, 'name'=>'a'),
+  array('id'=>103, 'parentid'=>101, 'name'=>'a'),
+);*/
+
+$lookupArr =array();
+
+$sql = 'Select id,name, parent_id parentid, "Tree.FOLDER" type from dubey_family_tree order by id';
+$result = $con->query($sql);
+	if ($result->num_rows > 0) {
+					while ($row = $result->fetch_assoc()) {
+						array_push($lookupArr,$row);
+					}
+	}
+//echo(json_encode($lookupArr,JSON_UNESCAPED_UNICODE));
+
+$arr=$lookupArr;
+
+$new = array();
+foreach ($arr as $a){
+    $new[$a['parentid']][] = $a;
+}
+$tree = createTree($new, array($arr[0]));
+$jsonvalue = json_encode($tree,JSON_UNESCAPED_UNICODE);
+$jsonvalue = str_replace('"id"','id',$jsonvalue );
+$jsonvalue = str_replace('"name"','name',$jsonvalue );
+$jsonvalue = str_replace('"parentid"','parentid',$jsonvalue );
+$jsonvalue = str_replace('"type"','type',$jsonvalue );
+$jsonvalue = str_replace('"Tree.FOLDER"','Tree.FOLDER',$jsonvalue );
+$jsonvalue = str_replace('"children"','children',$jsonvalue );
+echo($jsonvalue);
+
+function createTree(&$list, $parent){
+    $tree = array();
+    foreach ($parent as $k=>$l){
+        if(isset($list[$l['id']])){
+            $l['children'] = createTree($list, $list[$l['id']]);
+        }
+        $tree[] = $l;
+    } 
+    return $tree;
+}
+
+
+
+
+
+/*
+
+$sql = 'Select distinct parent_id from dubey_family_tree order by parent_id';
+
+
+			$result = $con->query($sql);
+				if ($result->num_rows > 0) {
+					while ($row = $result->fetch_assoc()) {
+						$pid = $row["parent_id"];
+						
+						$tql = "Select id,name,parent_id,'Tree.FOLDER' type   from dubey_family_tree where parent_id =${pid}";
+											
+						$pesult = $con->query($tql);
+							if ($pesult->num_rows > 0) {
+							while ($pow = $pesult->fetch_assoc()) {
+								
+									array_push($lookupArr,$pow);
+							}
+						}
+					
+					}
+				}
+		
+	echo(json_encode($lookupArr,JSON_UNESCAPED_UNICODE));
+*/
+?>
