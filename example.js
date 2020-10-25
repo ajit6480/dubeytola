@@ -22,10 +22,6 @@ tree.on('fetch', folder => window.setTimeout(() => {
 }, 1000));
 
 var structure = [{
-  name: 'Ajit'
-}, {
-  name: 'Tanish'
-}, {
   name: 'Ajit',
   open: false,
   type: Tree.FOLDER,
@@ -51,10 +47,6 @@ var structure = [{
       }]
     }]
   }]
-}, {
-  name: 'folder 2 (asynced)',
-  type: Tree.FOLDER,
-  asynced: true
 }];
 // keep track of the original node objects
 tree.on('created', (e, node) => {
